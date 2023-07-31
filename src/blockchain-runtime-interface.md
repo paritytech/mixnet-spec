@@ -1,12 +1,34 @@
 # Blockchain runtime interface
 
-The blockchain runtime provides [functions](#runtime-functions) for nodes to query the current
-session status and the mixnodes for the previous/current sessions.
+The blockchain runtime provides [functions](#queries) to query the current session status and the
+mixnodes for the previous/current sessions. It also provides [a function](#registration) to attempt
+to register a mixnode for the next session.
 
-For the runtime to be able to register a node as a mixnode, the node must implement [a
-function](#host-functions) to provide access to the node's per-session X25519 public keys.
+## Mixnode type
 
-## Runtime functions
+`Mixnode` instances are passed to the registration function and returned by mixnode queries.
+
+    struct Mixnode {
+        kx_public: [u8; 32],
+        peer_id: [u8; 32],
+        external_addresses: Vec<Vec<u8>>,
+    }
+
+`kx_public` is the X25519 public key for the mixnode in the session (the session is implicit).
+
+`peer_id` is the peer ID of the mixnode. It is a raw 32-byte Ed25519 public key, convertible to a
+normal libp2p peer ID as described in the libp2p [Peer Ids and
+Keys](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md) specification.
+
+`external_addresses` is a list of external addresses for the mixnode. Each external address is a
+UTF-8 encoded multiaddr.
+
+Note that the peer ID and external addresses for a mixnode are not validated _at all_ by the
+blockchain runtime. Nodes are expected to handle invalid peer IDs and addresses gracefully. In
+particular, an invalid peer ID or invalid external addresses for one mixnode should not affect a
+node's ability to connect and send packets to other mixnodes.
+
+## Queries
 
     struct SessionStatus {
         current_index: u32,
@@ -16,12 +38,6 @@ function](#host-functions) to provide access to the node's per-session X25519 pu
     fn MixnetApi_session_status() -> SessionStatus
 
 `MixnetApi_session_status` returns the index and phase of the current session.
-
-    struct Mixnode {
-        kx_public: [u8; 32],
-        peer_id: Vec<u8>,
-        external_addresses: Vec<Vec<u8>>,
-    }
 
     enum MixnodesErr {
         InsufficientRegistrations { num: u32, min: u32 },
@@ -34,27 +50,7 @@ function](#host-functions) to provide access to the node's per-session X25519 pu
 `MixnetApi_prev_mixnodes` returns the mixnodes for the previous session.
 `MixnetApi_current_mixnodes` returns the mixnodes for the current session. The order of the
 returned mixnodes is important; [routing actions](./sphinx.md#routing-actions) identify mixnodes by
-their index in these vectors.
-
-The following data is returned for each mixnode:
-
-- `kx_public`; the X25519 public key for the mixnode in the session.
-- `peer_id`; the libp2p peer ID of the mixnode. This is a SCALE encoded `Vec<u8>` containing a
-  multihash.
-- `external_addresses`; external addresses for the mixnode. Each external address is a SCALE
-  encoded `Vec<u8>` containing a UTF-8 multiaddr.
-
-Note that:
-
-- Mixnode peer IDs and external addresses are effectively SCALE encoded twice, as runtime function
-  return values are SCALE encoded. The quirky encoding of these fields matches the encoding used by
-  the `ext_offchain_network_state_version_1` host function.
-- The peer ID and external addresses for a mixnode are not validated _at all_ by the blockchain
-  runtime. They may not even be decodable. Nodes are expected to handle this gracefully. In
-  particular, failure to decode the peer ID or external addresses for one mixnode should not affect
-  a node's ability to connect and send packets to other mixnodes.
-
-These functions can return the following errors:
+their index in these vectors. These functions can return the following errors:
 
 - `InsufficientRegistrations`; too few mixnodes were registered for the session (`num`, less than
   the minimum `min`). The mixnet is not operational in such sessions, although nodes should still
@@ -63,9 +59,14 @@ These functions can return the following errors:
   returned by `MixnetApi_prev_mixnodes` during the last phase of a session. The mixnodes for the
   previous session should not be needed during this phase.
 
-## Host functions
+Nodes should always call query functions in the context of the latest finalised block.
 
-    fn ext_mixnet_kx_public_for_session_version_1(session_index: u32) -> Option<[u8; 32]>
+## Registration
 
-This should return the X25519 public key for the local node in the given session, or `None` if the
-key pair was discarded already.
+    fn MixnetApi_maybe_register(session_index: u32, mixnode: Mixnode) -> bool
+
+To register a mixnode for the next session, `MixnetApi_maybe_register` should be called in the
+context of every new best block. `session_index` should be the index of the current session, and
+`mixnode` should be the mixnode to register for the next session. If `true` is returned, a
+registration extrinsic was created; `MixnetApi_maybe_register` should not be called for a few
+blocks, to give the extrinsic a chance to get included.

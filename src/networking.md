@@ -18,5 +18,5 @@ to the [mixnet topology](./topology.md). If no external addresses have been publ
 mixnode, or none of them work, nodes should attempt to discover addresses using the libp2p DHT.
 
 All mixnet node peer IDs should be derived from Ed25519 public keys, "hashed" with the identity
-hash function. Nodes may assume this, although a bad peer ID published for one mixnode should not
-interfere with the ability of a node to connect and send packets to other mixnodes.
+function. Nodes may assume this. Note that the peer IDs published on the blockchain and used in
+forward actions are raw 32-byte Ed25519 public keys.
