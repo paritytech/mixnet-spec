@@ -68,3 +68,6 @@ context of every new best block. `session_index` should be the index of the curr
 `mixnode` should be the mixnode to register for the next session. If `true` is returned, a
 registration extrinsic was created; `MixnetApi_maybe_register` should not be called for a few
 blocks, to give the extrinsic a chance to get included.
+
+`MixnetApi_maybe_register` may call the host functions `ext_crypto_sr25519_sign_version_1` and
+`ext_offchain_submit_transaction_version_1`.
