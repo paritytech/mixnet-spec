@@ -114,6 +114,8 @@ Note that:
 - Decryption of the extended `actions` simply means XORing with the ChaCha20 keystream derived from
   `actions_encryption_key`.
 
+In the forward-to-peer-ID case, the peer ID is a raw 32-byte Ed25519 public key.
+
 ### Deliver actions
 
 If the first action is a deliver action, the packet is destined for the receiving node.

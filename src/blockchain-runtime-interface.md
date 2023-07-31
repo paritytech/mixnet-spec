@@ -16,9 +16,7 @@ to register a mixnode for the next session.
 
 `kx_public` is the X25519 public key for the mixnode in the session (the session is implicit).
 
-`peer_id` is the peer ID of the mixnode. It is a raw 32-byte Ed25519 public key, convertible to a
-normal libp2p peer ID as described in the libp2p [Peer Ids and
-Keys](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md) specification.
+`peer_id` is the peer ID of the mixnode. It is a raw 32-byte Ed25519 public key.
 
 `external_addresses` is a list of external addresses for the mixnode. Each external address is a
 UTF-8 encoded multiaddr.

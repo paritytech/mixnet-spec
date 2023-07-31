@@ -82,3 +82,10 @@ The following assertions should all succeed:
         ]),
         10.0
     )
+
+## Peer IDs
+
+The peer IDs published on the blockchain and used in forward actions are raw 32-byte Ed25519 public
+keys, encoded as described in the [Ed25519 paper](https://ed25519.cr.yp.to/ed25519-20110926.pdf).
+They are convertible to normal libp2p peer IDs as described in the libp2p [Peer Ids and
+Keys](https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md) specification.
