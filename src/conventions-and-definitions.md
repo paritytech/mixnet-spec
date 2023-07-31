@@ -40,7 +40,8 @@ The `exp_random` function is defined as follows:
     }
 
 Where `rand_chacha` and `rand_distr` match the behaviour of the `crates.io` crates with versions
-0.3.1 and 0.4.3 respectively.
+[0.3.1](https://crates.io/crates/rand_chacha/0.3.1) and
+[0.4.3](https://crates.io/crates/rand_distr/0.4.3) respectively.
 
 Given random 16-byte seeds, it produces exponentially distributed random `f64`s with a mean of 1.
 

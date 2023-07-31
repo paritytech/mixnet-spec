@@ -151,7 +151,8 @@ K<sub>3</sub> being 32 bytes, and K<sub>2</sub> and K<sub>4</sub> being 64 bytes
 
 The ChaCha20 stream cipher is initialised with a zero nonce.
 
-The `lioness` crate on `crates.io` provides a compatible implementation.
+The [`lioness` crate on `crates.io`](https://crates.io/crates/lioness) provides a compatible
+implementation.
 
 ## Replay filtering
 
