@@ -1,6 +1,6 @@
 # Conventions and definitions
 
-Code snippets roughly follow Rust syntax. `a . b` means the concatenation of arrays `a` and `b`.
+Code snippets roughly follow Rust syntax. `a ++ b` means the concatenation of arrays `a` and `b`.
 
 ## X25519
 
@@ -35,7 +35,7 @@ with the given personalisation (ASCII encoded), seed (little-endian encoded), an
 The `exp_random` function is defined as follows:
 
     fn exp_random(seed: [u8; 16]) -> f64 {
-        rng = rand_chacha::ChaChaRng::from_seed(seed . seed)
+        rng = rand_chacha::ChaChaRng::from_seed(seed ++ seed)
         rng.sample::<f64, _>(rand_distr::Exp1).min(10.0)
     }
 

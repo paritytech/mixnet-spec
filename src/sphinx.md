@@ -44,14 +44,14 @@ From the 32-byte shared secret, a number of other secrets are derived:
 These are derived as follows:
 
     kx_blinding_factor = clamp_scalar(
-        blake2b("sphinx-blind-fac", 0, kx_public . kx_shared_secret)[..32])
+        blake2b("sphinx-blind-fac", 0, kx_public ++ kx_shared_secret)[..32])
 
-    mac_key . actions_encryption_key . delay_seed =
+    mac_key ++ actions_encryption_key ++ delay_seed =
         blake2b("sphinx-small-d-s", 0, kx_shared_secret)
 
     payload_encryption_key =
-        blake2b("sphinx-pl-en-key", 0, kx_shared_secret) .
-        blake2b("sphinx-pl-en-key", 1, kx_shared_secret) .
+        blake2b("sphinx-pl-en-key", 0, kx_shared_secret) ++
+        blake2b("sphinx-pl-en-key", 1, kx_shared_secret) ++
         blake2b("sphinx-pl-en-key", 2, kx_shared_secret)
 
 ## MAC verification
