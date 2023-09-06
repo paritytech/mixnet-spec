@@ -39,7 +39,6 @@ node's ability to connect and send packets to other mixnodes.
 
     enum MixnodesErr {
         InsufficientRegistrations { num: u32, min: u32 },
-        Discarded,
     }
 
     fn MixnetApi_prev_mixnodes() -> Result<Vec<Mixnode>, MixnodesErr>
@@ -48,14 +47,10 @@ node's ability to connect and send packets to other mixnodes.
 `MixnetApi_prev_mixnodes` returns the mixnodes for the previous session.
 `MixnetApi_current_mixnodes` returns the mixnodes for the current session. The order of the
 returned mixnodes is important; [routing actions](./sphinx.md#routing-actions) identify mixnodes by
-their index in these vectors. These functions can return the following errors:
-
-- `InsufficientRegistrations`; too few mixnodes were registered for the session (`num`, less than
-  the minimum `min`). The mixnet is not operational in such sessions, although nodes should still
-  handle traffic for the previous session in the first 3 phases.
-- `Discarded`; the mixnodes for the session were discarded by the runtime. This should only be
-  returned by `MixnetApi_prev_mixnodes` during the last phase of a session. The mixnodes for the
-  previous session should not be needed during this phase.
+their index in these vectors. These functions can return `Err(InsufficientRegistrations)` if too
+few mixnodes were registered for the session (`num`, less than the minimum `min`). The mixnet is
+not operational in such sessions, although nodes should still handle traffic for the previous
+session in the first 3 phases.
 
 Nodes should always call query functions in the context of the latest finalised block.
 
