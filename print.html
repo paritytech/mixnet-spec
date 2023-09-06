@@ -1,0 +1,913 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Substrate Mix Network Specification</title>
+        <meta name="robots" content="noindex" />
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="conventions-and-definitions.html"><strong aria-hidden="true">2.</strong> Conventions and definitions</a></li><li class="chapter-item expanded "><a href="sessions.html"><strong aria-hidden="true">3.</strong> Sessions</a></li><li class="chapter-item expanded "><a href="topology.html"><strong aria-hidden="true">4.</strong> Topology</a></li><li class="chapter-item expanded "><a href="blockchain-runtime-interface.html"><strong aria-hidden="true">5.</strong> Blockchain runtime interface</a></li><li class="chapter-item expanded "><a href="networking.html"><strong aria-hidden="true">6.</strong> Networking</a></li><li class="chapter-item expanded "><a href="sphinx.html"><strong aria-hidden="true">7.</strong> Sphinx</a></li><li class="chapter-item expanded "><a href="message-fragmentation.html"><strong aria-hidden="true">8.</strong> Message fragmentation</a></li><li class="chapter-item expanded "><a href="requests-and-replies.html"><strong aria-hidden="true">9.</strong> Requests and replies</a></li><li class="chapter-item expanded "><a href="cover-traffic.html"><strong aria-hidden="true">10.</strong> Cover traffic</a></li><li class="chapter-item expanded "><a href="parameters.html"><strong aria-hidden="true">11.</strong> Parameters</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Substrate Mix Network Specification</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="introduction"><a class="header" href="#introduction">Introduction</a></h1>
+<p>A Substrate Mix Network enables anonymous submission of transactions to a blockchain. The Substrate
+Mix Network design is loosely based on
+<a href="https://www.usenix.org/system/files/conference/usenixsecurity17/sec17-piotrowska.pdf">Loopix</a>.</p>
+<p>A Substrate Mix Network has two main components:</p>
+<ul>
+<li>A network of nodes.</li>
+<li>A blockchain, which provides consensus on which nodes should operate as &quot;mixnodes&quot;, and accepts
+the anonymously submitted transactions.</li>
+</ul>
+<p>This specification details the behaviour required of a node. It is primarily aimed at those
+creating alternate node implementations.</p>
+<p>This specification does <em>not</em> attempt to:</p>
+<ul>
+<li>Describe the blockchain runtime logic; only the interface to the runtime is covered.</li>
+<li>Describe any particular node implementation.</li>
+<li>Justify design decisions.</li>
+</ul>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="conventions-and-definitions"><a class="header" href="#conventions-and-definitions">Conventions and definitions</a></h1>
+<p>Code snippets roughly follow Rust syntax. <code>a ++ b</code> means the concatenation of arrays <code>a</code> and <code>b</code>.</p>
+<h2 id="x25519"><a class="header" href="#x25519">X25519</a></h2>
+<p>X25519 is a Diffie-Hellman key exchange function, based on the elliptic curve Curve25519. It is
+described in detail in the <a href="https://cr.yp.to/ecdh/curve25519-20060209.pdf">Curve25519 paper</a>.</p>
+<p>X25519 is used to generate shared secrets for packet encryption and such. All X25519 keys and
+shared secrets are encoded as described in the paper.</p>
+<p>The <code>Curve25519</code> function, which multiplies a curve (or twist) point by a &quot;scalar&quot; value (such as a
+secret key), is defined in the paper. The <code>clamp_scalar</code> function is defined as follows:</p>
+<pre><code>fn clamp_scalar(scalar: [u8; 32]) -&gt; [u8; 32] {
+    scalar[0] &amp;= 248
+    scalar[31] &amp;= 127
+    scalar[31] |= 64
+    scalar
+}
+</code></pre>
+<p>It clamps a raw 32-byte value to the set of secret keys (scalars) defined in the paper.</p>
+<h2 id="blake2b"><a class="header" href="#blake2b">BLAKE2b</a></h2>
+<p>BLAKE2b is a cryptographic hash function. It is described in detail in <a href="https://www.blake2.net/blake2.pdf">BLAKE2: simpler, smaller,
+fast as MD5</a>.</p>
+<p><code>blake2b(personalisation, seed, key)</code> is defined as the BLAKE2b hash of the empty string computed
+with the given personalisation (ASCII encoded), seed (little-endian encoded), and key.</p>
+<h2 id="generation-of-exponentially-distributed-random-numbers"><a class="header" href="#generation-of-exponentially-distributed-random-numbers">Generation of exponentially distributed random numbers</a></h2>
+<p>The <code>exp_random</code> function is defined as follows:</p>
+<pre><code>fn exp_random(seed: [u8; 16]) -&gt; f64 {
+    rng = rand_chacha::ChaChaRng::from_seed(seed ++ seed)
+    rng.sample::&lt;f64, _&gt;(rand_distr::Exp1).min(10.0)
+}
+</code></pre>
+<p>Where <code>rand_chacha</code> and <code>rand_distr</code> match the behaviour of the <code>crates.io</code> crates with versions
+<a href="https://crates.io/crates/rand_chacha/0.3.1">0.3.1</a> and
+<a href="https://crates.io/crates/rand_distr/0.4.3">0.4.3</a> respectively.</p>
+<p>Given random 16-byte seeds, it produces exponentially distributed random <code>f64</code>s with a mean of 1.</p>
+<p>The following assertions should all succeed:</p>
+<pre><code>assert_eq!(
+    exp_random([
+        0xdc, 0x18, 0x0e, 0xe6, 0x71, 0x1e, 0xcf, 0x2d,
+        0xad, 0x0c, 0xde, 0xd1, 0xd4, 0x94, 0xbd, 0x3b
+    ]),
+    2.953842296445717
+)
+assert_eq!(
+    exp_random([
+        0x0a, 0xcc, 0x48, 0xbd, 0xa2, 0x30, 0x9a, 0x48,
+        0xc8, 0x78, 0x61, 0x0d, 0xf8, 0xc2, 0x8d, 0x99
+    ]),
+    1.278588765412407
+)
+assert_eq!(
+    exp_random([
+        0x17, 0x4c, 0x40, 0x2f, 0x8f, 0xda, 0xa6, 0x46,
+        0x45, 0xe7, 0x1c, 0xb0, 0x1e, 0xff, 0xf8, 0xfc
+    ]),
+    0.7747915675800142
+)
+assert_eq!(
+    exp_random([
+        0xca, 0xe8, 0x07, 0x72, 0x17, 0x28, 0xf7, 0x09,
+        0xd8, 0x7d, 0x3e, 0xa2, 0x03, 0x7d, 0x4f, 0x03
+    ]),
+    0.8799379598933348
+)
+assert_eq!(
+    exp_random([
+        0x61, 0x56, 0x54, 0x41, 0xd0, 0x25, 0xdf, 0xe7,
+        0xb9, 0xc8, 0x6a, 0x56, 0xdd, 0x27, 0x09, 0xa6
+    ]),
+    10.0
+)
+</code></pre>
+<h2 id="peer-ids"><a class="header" href="#peer-ids">Peer IDs</a></h2>
+<p>The peer IDs published on the blockchain and used in forward actions are raw 32-byte Ed25519 public
+keys, encoded as described in the <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Ed25519 paper</a>.
+They are convertible to normal libp2p peer IDs as described in the libp2p <a href="https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md">Peer Ids and
+Keys</a> specification.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sessions"><a class="header" href="#sessions">Sessions</a></h1>
+<p>The blockchain runtime divides time up into sessions, indexed starting from 0. Note that mixnet
+sessions need not be the same as eg BABE sessions.</p>
+<p>In the context of a session, the network nodes are split into two classes: mixnodes and
+non-mixnodes. Mixnodes are responsible for mixing traffic. Non-mixnodes may send requests into the
+mixnet and receive replies from the mixnet, but do not mix traffic. Non-mixnodes can join and leave
+the mixnet freely, but it is expected that if a node is a mixnode in a session, it will participate
+for the duration of the session.</p>
+<p>The mixnodes for each session are determined by the blockchain runtime. The mixnodes for a session
+need not be related in any way to the mixnodes for the previous/following sessions.</p>
+<p>Every node generates an X25519 key pair per session. Nodes use these keys to generate shared
+secrets for packet encryption and such; see the <a href="./sphinx.html#key-exchange">Sphinx chapter</a> for more
+details. Mixnode public keys are published on the blockchain and are thus available to all nodes.
+Non-mixnode public keys are not published.</p>
+<p>When a packet is constructed, it is constructed explicitly for a particular session. A packet's
+session is implicitly determined by the X25519 keys used to build it (again, see the <a href="./sphinx.html#mac-verification">Sphinx
+chapter</a>).</p>
+<h2 id="phases"><a class="header" href="#phases">Phases</a></h2>
+<p>Mixnet traffix is switched from one session to the next gradually, not instantly. Each mixnet
+session is divided into 4 phases. The current phase is determined by the blockchain runtime. The
+phases are as follows:</p>
+<div class="table-wrapper"><table><thead><tr><th>Phase</th><th>Previous session traffic</th><th>Current sesssion traffic</th><th>Default session</th></tr></thead><tbody>
+<tr><td>0</td><td>All, half rate</td><td>Cover and forward only, half rate</td><td>Previous</td></tr>
+<tr><td>1</td><td>All, half rate</td><td>All, half rate</td><td>Current</td></tr>
+<tr><td>2</td><td>Cover and forward only, half rate</td><td>All, half rate</td><td>Current</td></tr>
+<tr><td>3</td><td>None</td><td>All, full rate</td><td>Current</td></tr>
+</tbody></table>
+</div>
+<p>The session traffic columns indicate which packet classes should be sent using the previous/current
+session keys/mixnodes during each phase:</p>
+<ul>
+<li>None: no packets should be sent.</li>
+<li>Cover and forward only: cover packets should be generated and forwarded. Request/reply packets
+should <em>not</em> be sent.</li>
+<li>All: no restrictions.</li>
+</ul>
+<p>In the first 3 phases (where traffic is sent using both the previous and current session
+keys/mixnodes), cover and request/reply traffic should be sent at half the usual rate in each
+session.</p>
+<p>The default session column indicates which session should be preferred for new requests.</p>
+<p>Note that once the last phase has been reached, the X25519 key pairs for the previous session are
+no longer needed, and nodes should discard them.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="topology"><a class="header" href="#topology">Topology</a></h1>
+<p>The mixnodes for a session should be fully connected. That is, all mixnodes should attempt to
+maintain connections to all other mixnodes. The connections should be maintained for the whole
+session, as well as for the first 3 phases of the following session.</p>
+<p>Mixnodes should also accept connections from non-mixnodes. Non-mixnodes should attempt to connect
+to a small number of &quot;gateway&quot; mixnodes in each active session.</p>
+<h2 id="route-generation"><a class="header" href="#route-generation">Route generation</a></h2>
+<p>Routes through the mixnet are always generated in the context of a session, for a single
+packet/<a href="./sphinx.html#surbs">SURB</a>. If multiple packets are to be sent, or multiple SURBs are to be
+built, a separate route should be generated for each one.</p>
+<p>There are three kinds of route that a node may need to generate:</p>
+<ul>
+<li>From the node to a mixnode. For requests and drop cover traffic.</li>
+<li>From a mixnode to the node. For SURBs (sent in requests to enable replies).</li>
+<li>From the node to itself. For loop cover traffic.</li>
+</ul>
+<p>Routes should be no longer than 7 nodes, including the source and destination nodes. The
+intermediate mixnodes should be uniformly randomly chosen, subject to the following constraints:</p>
+<ul>
+<li>If the generating node is not a mixnode, any nodes immediately preceding/following it must be
+connected gateway mixnodes.</li>
+<li>No mixnode should appear in a route more than once, unless this is unavoidable. For example, when
+a non-mixnode is generating a loop route, if there is only a single connected gateway mixnode,
+the gateway must necessarily appear twice.</li>
+<li>No node should ever appear twice consecutively in a route.</li>
+</ul>
+<p>Note that although very short routes are possible, longer routes provide more anonymity. As such,
+it is recommended that by default nodes generate the longest routes possible (7 nodes).</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="blockchain-runtime-interface"><a class="header" href="#blockchain-runtime-interface">Blockchain runtime interface</a></h1>
+<p>The blockchain runtime provides <a href="blockchain-runtime-interface.html#queries">functions</a> to query the current session status and the
+mixnodes for the previous/current sessions. It also provides <a href="blockchain-runtime-interface.html#registration">a function</a> to attempt
+to register a mixnode for the next session.</p>
+<h2 id="mixnode-type"><a class="header" href="#mixnode-type">Mixnode type</a></h2>
+<p><code>Mixnode</code> instances are passed to the registration function and returned by mixnode queries.</p>
+<pre><code>struct Mixnode {
+    kx_public: [u8; 32],
+    peer_id: [u8; 32],
+    external_addresses: Vec&lt;Vec&lt;u8&gt;&gt;,
+}
+</code></pre>
+<p><code>kx_public</code> is the X25519 public key for the mixnode in the session (the session is implicit).</p>
+<p><code>peer_id</code> is the peer ID of the mixnode. It is a raw 32-byte Ed25519 public key.</p>
+<p><code>external_addresses</code> is a list of external addresses for the mixnode. Each external address is a
+UTF-8 encoded multiaddr.</p>
+<p>Note that the peer ID and external addresses for a mixnode are not validated <em>at all</em> by the
+blockchain runtime. Nodes are expected to handle invalid peer IDs and addresses gracefully. In
+particular, an invalid peer ID or invalid external addresses for one mixnode should not affect a
+node's ability to connect and send packets to other mixnodes.</p>
+<h2 id="queries"><a class="header" href="#queries">Queries</a></h2>
+<pre><code>struct SessionStatus {
+    current_index: u32,
+    phase: u8,
+}
+
+fn MixnetApi_session_status() -&gt; SessionStatus
+</code></pre>
+<p><code>MixnetApi_session_status</code> returns the index and phase of the current session.</p>
+<pre><code>enum MixnodesErr {
+    InsufficientRegistrations { num: u32, min: u32 },
+}
+
+fn MixnetApi_prev_mixnodes() -&gt; Result&lt;Vec&lt;Mixnode&gt;, MixnodesErr&gt;
+fn MixnetApi_current_mixnodes() -&gt; Result&lt;Vec&lt;Mixnode&gt;, MixnodesErr&gt;
+</code></pre>
+<p><code>MixnetApi_prev_mixnodes</code> returns the mixnodes for the previous session.
+<code>MixnetApi_current_mixnodes</code> returns the mixnodes for the current session. The order of the
+returned mixnodes is important; <a href="./sphinx.html#routing-actions">routing actions</a> identify mixnodes by
+their index in these vectors. These functions can return <code>Err(InsufficientRegistrations)</code> if too
+few mixnodes were registered for the session (<code>num</code>, less than the minimum <code>min</code>). The mixnet is
+not operational in such sessions, although nodes should still handle traffic for the previous
+session in the first 3 phases.</p>
+<p>Nodes should always call query functions in the context of the latest finalised block.</p>
+<h2 id="registration"><a class="header" href="#registration">Registration</a></h2>
+<pre><code>fn MixnetApi_maybe_register(session_index: u32, mixnode: Mixnode) -&gt; bool
+</code></pre>
+<p>To register a mixnode for the next session, <code>MixnetApi_maybe_register</code> should be called in the
+context of every new best block. <code>session_index</code> should be the index of the current session, and
+<code>mixnode</code> should be the mixnode to register for the next session. If <code>true</code> is returned, a
+registration extrinsic was created; <code>MixnetApi_maybe_register</code> should not be called for a few
+blocks, to give the extrinsic a chance to get included.</p>
+<p><code>MixnetApi_maybe_register</code> may call the host functions <code>ext_crypto_sr25519_sign_version_1</code> and
+<code>ext_offchain_submit_transaction_version_1</code>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="networking"><a class="header" href="#networking">Networking</a></h1>
+<p>Nodes send mixnet packets to each other using a Substrate notifications protocol. The protocol name
+is derived from the genesis hash of the blockchain:</p>
+<pre><code>/{genesis_hash_hex}/mixnet/1
+</code></pre>
+<p>or (in the case of a blockchain fork):</p>
+<pre><code>/{genesis_hash_hex}/{fork_id}/mixnet/1
+</code></pre>
+<p>Notifications with sizes not matching the <a href="./sphinx.html#packet-structure">Sphinx packet size</a> should
+be discarded. All other notifications should be handled as Sphinx packets.</p>
+<p>Nodes should use the <a href="./blockchain-runtime-interface.html#runtime-functions">peer IDs and external addresses published on the
+blockchain</a> to connect to mixnodes according
+to the <a href="./topology.html">mixnet topology</a>. If no external addresses have been published for a
+mixnode, or none of them work, nodes should attempt to discover addresses using the libp2p DHT.</p>
+<p>All mixnet node peer IDs should be derived from Ed25519 public keys, &quot;hashed&quot; with the identity
+function. Nodes may assume this. Note that the peer IDs published on the blockchain and used in
+forward actions are raw 32-byte Ed25519 public keys.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="sphinx"><a class="header" href="#sphinx">Sphinx</a></h1>
+<p>Substrate Mix Networks use a packet format based on
+<a href="https://cypherpunks.ca/~iang/pubs/Sphinx_Oakland09.pdf">Sphinx</a>.</p>
+<h2 id="packet-structure"><a class="header" href="#packet-structure">Packet structure</a></h2>
+<p>All packets are the same size: 2,252 bytes. These bytes are split as follows:</p>
+<div class="table-wrapper"><table><thead><tr><th>Bytes</th><th>Field</th><th>Description</th></tr></thead><tbody>
+<tr><td>0..31</td><td><code>kx_public</code></td><td>X25519 public key, α in the Sphinx paper</td></tr>
+<tr><td>32..47</td><td><code>mac</code></td><td>MAC, γ in the Sphinx paper</td></tr>
+<tr><td>48..187</td><td><code>actions</code></td><td>Encrypted routing actions, β in the Sphinx paper</td></tr>
+<tr><td>188..2251</td><td><code>payload</code></td><td>Encrypted payload, δ in the Sphinx paper</td></tr>
+</tbody></table>
+</div>
+<p>The <code>kx_public</code>, <code>mac</code>, and <code>actions</code> fields together form the header.</p>
+<h2 id="key-exchange"><a class="header" href="#key-exchange">Key exchange</a></h2>
+<p>The X25519 public key <code>kx_public</code> is combined with the receiving node's X25519 secret key for the
+session <code>recv_kx_secret</code> to produce a 32-byte shared secret <code>kx_shared_secret</code>:</p>
+<pre><code>kx_shared_secret = Curve25519(recv_kx_secret, kx_public)
+</code></pre>
+<p>The same shared secret can be derived by combining the secret key corresponding to <code>kx_public</code>,
+<code>kx_secret</code>, with the receiving node's public key <code>recv_kx_public</code>:</p>
+<pre><code>kx_shared_secret = Curve25519(kx_secret, recv_kx_public)
+</code></pre>
+<p>Note that <code>kx_public</code> bears no relation to the source node's X25519 key pair for the session; the
+corresponding secret key is <a href="sphinx.html#key-generation">randomly generated per packet</a>.</p>
+<h2 id="secret-derivation"><a class="header" href="#secret-derivation">Secret derivation</a></h2>
+<p>From the 32-byte shared secret, a number of other secrets are derived:</p>
+<ul>
+<li>A 32-byte X25519 blinding factor <code>kx_blinding_factor</code>.</li>
+<li>A 16-byte MAC key <code>mac_key</code>.</li>
+<li>A 32-byte routing actions encryption key <code>actions_encryption_key</code>.</li>
+<li>A 16-byte forwarding delay seed <code>delay_seed</code>.</li>
+<li>A 192-byte payload encryption key <code>payload_encryption_key</code>.</li>
+</ul>
+<p>These are derived as follows:</p>
+<pre><code>kx_blinding_factor = clamp_scalar(
+    blake2b(&quot;sphinx-blind-fac&quot;, 0, kx_public ++ kx_shared_secret)[..32])
+
+mac_key ++ actions_encryption_key ++ delay_seed =
+    blake2b(&quot;sphinx-small-d-s&quot;, 0, kx_shared_secret)
+
+payload_encryption_key =
+    blake2b(&quot;sphinx-pl-en-key&quot;, 0, kx_shared_secret) ++
+    blake2b(&quot;sphinx-pl-en-key&quot;, 1, kx_shared_secret) ++
+    blake2b(&quot;sphinx-pl-en-key&quot;, 2, kx_shared_secret)
+</code></pre>
+<h2 id="mac-verification"><a class="header" href="#mac-verification">MAC verification</a></h2>
+<p><code>mac</code> should equal the BLAKE2b hash of <code>actions</code> computed with the key <code>mac_key</code>.</p>
+<p>The receiving node determines the packet's session by which X25519 secret key results in the hash
+equalling <code>mac</code>. If neither the previous nor current session key results in a hash equalling <code>mac</code>,
+the packet is simply dropped.</p>
+<h2 id="routing-actions"><a class="header" href="#routing-actions">Routing actions</a></h2>
+<p>The routing actions in <code>actions</code> dictate how the packet should be routed. There should be a
+&quot;forward&quot; action for each intermediate node, followed by a single &quot;deliver&quot; action for the final
+node.</p>
+<p>Actions are two-byte little-endian unsigned integers, with some actions being followed by
+additional data:</p>
+<div class="table-wrapper"><table><thead><tr><th>Action</th><th>Description</th><th>Additional data</th></tr></thead><tbody>
+<tr><td>&lt; 0xff00</td><td>Forward to the mixnode with this index</td><td>16-byte MAC</td></tr>
+<tr><td>0xff00</td><td>Forward to the node with the given peer ID</td><td>32-byte peer ID, 16-byte MAC</td></tr>
+<tr><td>0xff01</td><td>Deliver request packet</td><td>None</td></tr>
+<tr><td>0xff02</td><td>Deliver reply packet</td><td>16-byte SURB ID</td></tr>
+<tr><td>0xff03</td><td>Deliver cover packet</td><td>None</td></tr>
+<tr><td>0xff04</td><td>Deliver cover packet with ID</td><td>16-byte cover ID</td></tr>
+<tr><td>&gt; 0xff04</td><td>Invalid</td><td>N/A</td></tr>
+</tbody></table>
+</div>
+<p>Actions are tightly packed, with the first two bytes of <code>actions</code> giving the first action.</p>
+<p><code>actions</code> is encrypted with the ChaCha20 stream cipher, keyed by <code>actions_encryption_key</code>, using a
+nonce of zero. Actions past the first are encrypted further with different keys; only the first
+action can be fully decrypted by the receiving node.</p>
+<h3 id="forward-actions"><a class="header" href="#forward-actions">Forward actions</a></h3>
+<p>If the first action is a forward action, and the receiving node is a mixnode in the session, it
+should attempt to forward the packet to the specified node. If the receiving node is not a mixnode,
+the packet should be discarded. Before forwarding, the packet should be artificially delayed, and
+transformed.</p>
+<p>The artificial delay should be calculated as <code>exp_random(delay_seed) * mean_delay</code>, where
+<code>mean_delay</code> is the mean forwarding delay (see the <a href="./parameters.html">parameters chapter</a>).</p>
+<p>The packet should be transformed as follows:</p>
+<div class="table-wrapper"><table><thead><tr><th>Field</th><th>Transformation</th></tr></thead><tbody>
+<tr><td><code>kx_public</code></td><td>Replace with <code>Curve25519(kx_blinding_factor, kx_public)</code></td></tr>
+<tr><td><code>mac</code></td><td>Replace with the MAC following the forward action</td></tr>
+<tr><td><code>actions</code></td><td>Extend with zero bytes, decrypt, then drop the first action</td></tr>
+<tr><td><code>payload</code></td><td>Decrypt using <code>payload_encryption_key</code></td></tr>
+</tbody></table>
+</div>
+<p>Note that:</p>
+<ul>
+<li>The number of zero bytes appended to <code>actions</code> should match the length of the first action (2
+plus the length of any additional data); after dropping the first action the total length should
+match the original length prior to extension.</li>
+<li>Decryption of the extended <code>actions</code> simply means XORing with the ChaCha20 keystream derived from
+<code>actions_encryption_key</code>.</li>
+</ul>
+<p>In the forward-to-peer-ID case, the peer ID is a raw 32-byte Ed25519 public key.</p>
+<h3 id="deliver-actions"><a class="header" href="#deliver-actions">Deliver actions</a></h3>
+<p>If the first action is a deliver action, the packet is destined for the receiving node.</p>
+<p>If the packet is a cover packet, it should simply be discarded.</p>
+<p>If the packet is a request packet, and the receiving node is a mixnode in the session, the payload
+should be decrypted using <code>payload_encryption_key</code>. If the receiving node is <em>not</em> a mixnode, the
+packet should be discarded.</p>
+<p>If the packet is a reply packet, the receiving node should lookup and remove the payload encryption
+keys corresponding to the SURB ID from its SURB keystore. If the keys are not found, the packet
+should be discarded. Otherwise, the keys should be used, one at a time in reverse order, to
+<em>encrypt</em> the payload. See <a href="sphinx.html#surbs">the SURBs section below</a> for more on SURBs.</p>
+<p>After decryption/encryption of a request/reply payload, if the last 16 bytes of the payload are 0,
+the rest of the payload should be handled as a <a href="./message-fragmentation.html#fragment-structure">message
+fragment</a>. If the last 16 bytes are not all 0, the
+packet is invalid and should be discarded.</p>
+<h3 id="invalid-actions"><a class="header" href="#invalid-actions">Invalid actions</a></h3>
+<p>If the first action is invalid, the receiving node should discard the packet.</p>
+<h2 id="payload-encryption"><a class="header" href="#payload-encryption">Payload encryption</a></h2>
+<p>The LIONESS cipher, instantiated with BLAKE2b as the hash function and ChaCha20 as the stream
+cipher, is used for payload encryption. LIONESS is described in detail in <a href="https://www.cl.cam.ac.uk/~rja14/Papers/bear-lion.pdf">Two Practical and
+Provably Secure Block Ciphers: BEAR and
+LION</a>.</p>
+<p>Encryption keys, such as <code>payload_encryption_key</code>, are the concatenation of K<sub>1</sub>,
+K<sub>2</sub>, K<sub>3</sub>, and K<sub>4</sub> (see the linked paper), with K<sub>1</sub> and
+K<sub>3</sub> being 32 bytes, and K<sub>2</sub> and K<sub>4</sub> being 64 bytes.</p>
+<p>The ChaCha20 stream cipher is initialised with a zero nonce.</p>
+<p>The <a href="https://crates.io/crates/lioness"><code>lioness</code> crate on <code>crates.io</code></a> provides a compatible
+implementation.</p>
+<h2 id="replay-filtering"><a class="header" href="#replay-filtering">Replay filtering</a></h2>
+<p>If a node receives multiple packets which have the same <code>kx_shared_secret</code>, it must avoid
+forwarding or delivering more than one of them. Note that:</p>
+<ul>
+<li>When a secret key is discarded (eg due to a session switch), all shared secrets which were
+derived from the secret key may be forgotten.</li>
+<li>If a packet is discarded before being forwarded or delivered, its shared secret need not be
+remembered.</li>
+<li>It is not necessary to record reply packet shared secrets, as the lookup in the SURB keystore
+will fail for replayed SURBs. Further, as cover packets are simply discarded, and request and
+forward packets are not accepted by non-mixnodes, if a node is never a mixnode, it need not do
+any explicit replay filtering.</li>
+<li>It is expected that nodes will use a probabilistic data structure, such as a bloom filter, to
+record which shared secrets have been derived from each secret key. The false-negative rate of
+the data structure should be zero. The false-positive rate should be below 1% (ie there should be
+at most 1% packet loss caused by faulty filtering). Shared secret hashes should be cryptographic,
+and keyed to avoid DoS attacks.</li>
+</ul>
+<h2 id="packet-construction"><a class="header" href="#packet-construction">Packet construction</a></h2>
+<p>This section covers the construction of request and cover packets. Reply packet construction is
+slightly different as it is split into two parts, which take place on different nodes: SURB
+construction (receiving node) and SURB use (sending node). This is covered in the <a href="sphinx.html#surbs">SURBs section
+below</a>.</p>
+<h3 id="key-generation"><a class="header" href="#key-generation">Key generation</a></h3>
+<p>The first step in constructing a Sphinx packet is key generation. An X25519 key pair should be
+generated as follows:</p>
+<pre><code>kx_secret = clamp_scalar(random())
+kx_public = Curve25519(kx_secret, 9)
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>random()</code> generates 32 random bytes.</li>
+<li><code>9</code>, the X25519 base point, is little-endian encoded.</li>
+</ul>
+<h3 id="shared-secret-computation"><a class="header" href="#shared-secret-computation">Shared secret computation</a></h3>
+<p>The shared secrets can then be computed incrementally:</p>
+<pre><code>kx_secrets[0] = kx_secret
+kx_shared_secrets[i] = Curve25519(kx_secrets[i], recv_kx_publics[i])
+kx_publics[i] = Curve25519(kx_secrets[i], 9)
+kx_secrets[i + 1] = (kx_blinding_factors[i] * kx_secrets[i]) % order
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>recv_kx_publics[i]</code> is the X25519 public key of the <code>i</code>th node in the route (excluding the
+source node).</li>
+<li><code>kx_blinding_factors[i]</code> is computed from <code>kx_publics[i]</code> and <code>kx_shared_secrets[i]</code> as described
+<a href="sphinx.html#secret-derivation">above</a>.</li>
+<li><code>order</code> is 2<sup>252</sup> + 27742317777372353535851937790883648493; the order of the group
+generated by the X25519 base point.</li>
+</ul>
+<h3 id="routing-actions-1"><a class="header" href="#routing-actions-1">Routing actions</a></h3>
+<p>Generating the encrypted routing actions (<code>actions</code>) is non-trivial; the MACs attached to the
+forward actions depend on the &quot;padding&quot; (encrypted zeroes) the receiving nodes will see. One method
+is as follows:</p>
+<ul>
+<li>Write the routing actions, unencrypted, into <code>actions</code>. Leave any MACs uninitialised. Fill any
+unused bytes with random data.</li>
+<li>Compute the padding that each node along the route will observe on packet arrival. The length at
+each node should match the total length of all earlier actions. The padding is generated by
+zero-extension and encryption at each node along the route; it can be determined from the action
+sizes and <code>kx_shared_secrets</code>.</li>
+<li>For each action, in reverse order:
+<ul>
+<li>Encrypt all bytes from the start of the action to the end of <code>actions</code>, using the encryption
+key for the node that will process the action.</li>
+<li>Compute the MAC of the concatenation of the just-encrypted part of <code>actions</code> with the
+corresponding padding computed in the second step, using the MAC key for the node that will
+process the action. In the case of the first action, write the MAC to <code>mac</code>; for other actions,
+write it into <code>actions</code> immediately before the action.</li>
+</ul>
+</li>
+</ul>
+<p>Whichever method is used, it is important that any unused decrypted data the final node sees is
+indistinguishable from random. If this is not the case, the final node may be able to infer the
+route length. The above method achieves this by filling unused bytes with random data in the first
+step.</p>
+<p>Note that the 140-byte <code>actions</code> is just large enough to handle the <a href="./topology.html#route-generation">worst case
+route</a>:</p>
+<ul>
+<li>4 forward-to-mixnode actions (18 bytes each, 72 bytes total).</li>
+<li>One forward-to-peer-ID action (50 bytes).</li>
+<li>One deliver action with a 16-byte ID (18 bytes).</li>
+</ul>
+<h3 id="payload"><a class="header" href="#payload">Payload</a></h3>
+<p>Constructing <code>payload</code> is straightforward. For cover packets, simply fill <code>payload</code> with random
+bytes. For request packets:</p>
+<ul>
+<li>Write zeroes to the last 16 bytes. Write the unencrypted <a href="./message-fragmentation.html#fragment-structure">message
+fragment</a> to the other bytes.</li>
+<li><a href="sphinx.html#secret-derivation">Derive the payload encryption keys</a> for the nodes along the route from
+<code>kx_shared_secrets</code>.</li>
+<li>Encrypt <code>payload</code> using each encryption key, in reverse order (starting with the encryption key
+for the destination node).</li>
+</ul>
+<h2 id="surbs"><a class="header" href="#surbs">SURBs</a></h2>
+<p>A SURB (single-use reply block) can be used to send a reply packet to the node that generated it.
+As the name suggests, each SURB should only be used once. SURBs are always 222 bytes, split as
+follows:</p>
+<div class="table-wrapper"><table><thead><tr><th>Bytes</th><th>Field</th><th>Description</th></tr></thead><tbody>
+<tr><td>0..1</td><td><code>first_mixnode_index</code></td><td>Little-endian index of the first mixnode in the route</td></tr>
+<tr><td>2..189</td><td><code>header</code></td><td>Prefabricated Sphinx header</td></tr>
+<tr><td>190..221</td><td><code>shared_secret</code></td><td>Secret to derive the first payload encryption key from</td></tr>
+</tbody></table>
+</div>
+<h3 id="surb-construction"><a class="header" href="#surb-construction">SURB construction</a></h3>
+<p>Equipped with a <a href="./topology.html#route-generation">route</a>, a node can build a SURB as follows:</p>
+<ul>
+<li>Set <code>first_mixnode_index</code> to the index of the first mixnode in the route, excluding the source
+node.</li>
+<li>Build the Sphinx header <code>header</code> as <a href="sphinx.html#packet-construction">normal</a>, with the last action being a
+deliver reply action with a randomly generated SURB ID.</li>
+<li>Randomly generate <code>shared_secret</code>.</li>
+<li><a href="sphinx.html#secret-derivation">Derive the payload encryption keys</a> for the nodes along the route from
+<code>kx_shared_secrets</code>, excluding the source and destination nodes.</li>
+<li>Derive a payload encryption key from <code>shared_secret</code> in the same way.</li>
+<li>Store the payload encryption keys (the one derived from <code>shared_secret</code>, followed by the ones
+derived from <code>kx_shared_secrets</code>) in the SURB keystore, keyed by the SURB ID.</li>
+</ul>
+<p>The payload encryption keys corresponding to a SURB ID may never get used, for example if the SURB
+or the reply packet are lost. It is expected that nodes will only keep a limited number of keys,
+for the most recently generated SURBs.</p>
+<h3 id="surb-use"><a class="header" href="#surb-use">SURB use</a></h3>
+<p>Constructing a reply packet from a SURB is straightforward:</p>
+<ul>
+<li>Split <code>header</code> into <code>kx_public</code>, <code>mac</code>, and <code>actions</code>.</li>
+<li>Write zeroes to the last 16 bytes of <code>payload</code>. Write the unencrypted <a href="./message-fragmentation.html#fragment-structure">message
+fragment</a> to the other bytes.</li>
+<li>Derive a payload encryption key from <code>shared_secret</code> in the same way that
+<code>payload_encryption_key</code> is derived from <code>kx_shared_secret</code> <a href="sphinx.html#secret-derivation">above</a>.</li>
+<li><em>Decrypt</em> <code>payload</code> using the derived key.</li>
+</ul>
+<p>The constructed packet should be sent to the mixnode with index <code>first_mixnode_index</code>. The session
+is implicit: it should match the session used by the request message containing the SURB.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="message-fragmentation"><a class="header" href="#message-fragmentation">Message fragmentation</a></h1>
+<p>Request and reply messages are split into 2,048-byte fragments. Each fragment of a message is
+wrapped in a <a href="./sphinx.html">Sphinx packet</a> and sent along a different route to the destination. The
+destination node is responsible for collecting the fragments together and reassembling the message.</p>
+<h2 id="fragment-structure"><a class="header" href="#fragment-structure">Fragment structure</a></h2>
+<p>The 2,048 bytes in a fragment are split as follows:</p>
+<div class="table-wrapper"><table><thead><tr><th>Bytes</th><th>Field</th><th>Description</th></tr></thead><tbody>
+<tr><td>0..15</td><td><code>message_id</code></td><td>The same for all fragments of a message</td></tr>
+<tr><td>16..17</td><td><code>num_fragments_minus_1</code></td><td>Little-endian number of fragments minus one</td></tr>
+<tr><td>18..19</td><td><code>fragment_index</code></td><td>Little endian index of this fragment</td></tr>
+<tr><td>20..21</td><td><code>data_size</code></td><td>Little-endian number of bytes of message data in this fragment</td></tr>
+<tr><td>22</td><td><code>num_surbs</code></td><td>Number of SURBs in this fragment</td></tr>
+<tr><td>23..2047</td><td><code>payload</code></td><td>Message data and SURBs</td></tr>
+</tbody></table>
+</div>
+<p><code>payload</code> has <code>data_size</code> bytes of message data at the start, and <code>num_surbs</code>
+<a href="./sphinx.html#surbs">SURBs</a> tightly packed at the end. Any unused bytes in the middle should be
+written as 0 by message senders, but ignored by receivers.</p>
+<h2 id="reassembly"><a class="header" href="#reassembly">Reassembly</a></h2>
+<p>Received fragments should be grouped by <code>message_id</code>. Once a full set of fragments for a
+<code>message_id</code> has been received, the message data and SURBs from each fragment should be
+concatenated, in index order, to give the original message and an array of SURBs that can be used
+to reply. The fragments should then be discarded; it is important that no SURB is used more than
+once.</p>
+<p>The session and type (request/reply) of a message should be inferred from the last received
+fragment, and the message data and SURBs <a href="./requests-and-replies.html">handled appropriately</a>. In the
+case of a reply message, the corresponding request message ID should also be inferred from the last
+received packet: request message IDs should be stored alongside payload encryption keys in the SURB
+keystore.</p>
+<p>Note that:</p>
+<ul>
+<li>Malicious nodes may send fragments with the same <code>message_id</code> but differing
+<code>num_fragments_minus_1</code>. Simply discarding all fragments with a different <code>num_fragments_minus_1</code>
+to the first-received fragment is acceptable.</li>
+<li>Nodes should enforce a limit on the number of fragments per message (see the <a href="./parameters.html">parameters
+chapter</a>), by simply discarding fragments with a too-large
+<code>num_fragments_minus_1</code>.</li>
+<li>Multiple fragments with the same <code>message_id</code> and <code>fragment_index</code> may be received. It is
+recommended that only one be kept.</li>
+<li>Invalid fragments, with <code>fragment_index &gt; num_fragments_minus_1</code> or <code>(data_size + (num_surbs * 222)) &gt; 2025</code>, should be discarded.</li>
+</ul>
+<p>It is expected that nodes will only keep a limited number of fragments, for the most recently seen
+<code>message_id</code>s.</p>
+<h2 id="construction"><a class="header" href="#construction">Construction</a></h2>
+<p>Message IDs should be randomly generated. When retransmitting a message, the message ID should be
+reused. If a new destination is chosen for retransmission however, or if the retransmission is in a
+different session, a new message ID should be generated.</p>
+<p>There are essentially no rules on how message data and SURBs may be split amongst fragments; the
+only constraints are:</p>
+<ul>
+<li>The message data and SURBs assigned to each fragment must fit.</li>
+<li>The fragments-per-message limit must not be exceeded.</li>
+</ul>
+<p>It <em>is</em> important however that the same split is used if a message is retransmitted with the same
+<code>message_id</code>.</p>
+<p>When retransmitting a fragment, exactly the same message data should be sent, but new SURBs must be
+generated: no SURB should ever be sent twice. When generating SURBs for a request, the message ID
+should be stored in the SURB keystore alongside the payload encryption keys.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="requests-and-replies"><a class="header" href="#requests-and-replies">Requests and replies</a></h1>
+<p>Request and reply messages are SCALE encoded. Requests have the following type:</p>
+<pre><code>enum Request {
+    #[codec(index = 1)]
+    SubmitExtrinsic(Extrinsic),
+}
+</code></pre>
+<p>Where <code>Extrinsic</code> is the extrinsic type of the blockchain.</p>
+<p>Replies have types of the form <code>Result&lt;T, RemoteErr&gt;</code>, where <code>T</code> depends on the request, and
+<code>RemoteErr</code> is defined as follows:</p>
+<pre><code>enum RemoteErr {
+    Other(String),
+    Decode(String),
+}
+</code></pre>
+<p><code>Decode</code> means the node failed to decode the request. <code>Other</code> means the node encountered some other
+error. In both cases the <code>String</code> is a description of the error, suitable for presenting to the
+user.</p>
+<p>Note that nodes may simply ignore malformed requests, instead of responding with <code>Err(Decode)</code>.</p>
+<h2 id="submitextrinsic"><a class="header" href="#submitextrinsic"><code>SubmitExtrinsic</code></a></h2>
+<p>A <code>SubmitExtrinsic</code> request can be sent to anonymously submit an extrinsic to the blockchain. The
+reply type is <code>Result&lt;(), RemoteErr&gt;</code>. <code>Ok(())</code> means the receiving node successfully imported the
+extrinsic into its transaction pool. It does <em>not</em> mean that the extrinsic was included in the
+blockchain.</p>
+<p>After receiving a <code>SubmitExtrinsic</code> request, a node should wait before attempting to import the
+extrinsic. The delay should be determined from the request message ID as follows:</p>
+<pre><code>seed = blake2b(&quot;submit-extrn-dly&quot;, 0, message_id)[..16]
+delay = exp_random(seed) * mean_delay
+</code></pre>
+<p>Where <code>mean_delay</code> is the mean extrinsic delay; see the <a href="./parameters.html">parameters chapter</a>.</p>
+<h2 id="packet-queues"><a class="header" href="#packet-queues">Packet queues</a></h2>
+<p>Nodes should maintain a bounded request/reply packet queue for each session. Packets from a
+session's queue should be dispatched in place of <a href="./cover-traffic.html">drop cover packets</a> for the
+session (provided the <a href="./sessions.html#phases">current phase</a> permits request/reply packets to be
+sent). The queue bound should be the same for all mixnodes in a session; see the <a href="./parameters.html">parameters
+chapter</a>.</p>
+<p>Reply packets should simply be dropped if they cannot be pushed onto the request/reply queue. It is
+recommended however that nodes use additional queues and/or back-pressure to avoid dropping request
+packets.</p>
+<h2 id="request-sending"><a class="header" href="#request-sending">Request sending</a></h2>
+<p>The session for a request should be chosen according to the table in the <a href="./sessions.html#phases">sessions
+chapter</a>. The destination node should be uniformly randomly picked from the
+mixnodes for the session, excluding the source node and, if there is exactly one, its connected
+gateway mixnode. The same session and destination should be used for retransmission, unless:</p>
+<ul>
+<li>The phase changes such that request packets may no longer be sent in the chosen session.</li>
+<li>The destination fails to reply too many times.</li>
+</ul>
+<p>In these cases, a new session and destination should be selected.</p>
+<p>The request message should be <a href="./message-fragmentation.html#construction">split into fragments</a>,
+which should then be <a href="./sphinx.html#packet-construction">wrapped in Sphinx packets</a> and pushed onto
+the session's request/reply queue. The route for each packet should be generated independently as
+described in the <a href="./topology.html#route-generation">topology chapter</a>.</p>
+<p>Multiple copies of each fragment may be sent to improve the chance of success. Each copy of a
+fragment should contain different SURBs, and should be sent along a different route to the
+destination.</p>
+<h3 id="retransmission"><a class="header" href="#retransmission">Retransmission</a></h3>
+<p>The round-trip time for a request can be conservatively estimated as follows:</p>
+<pre><code>(s, n, m, r) = if request_period &gt; reply_period {
+    (request_period, request_len, reply_len, reply_period / request_period)
+} else {
+    (reply_period, reply_len, request_len, request_period / reply_period)
+}
+queue_delay = s * (4.92582 + (3.87809 * sqrt(n + (r * r * r * m))) + n + (r * m))
+
+net_delay = per_hop_net_delay * num_hops
+
+rtt = forwarding_delay + queue_delay + net_delay + handling_delay
+</code></pre>
+<p>Where:</p>
+<ul>
+<li><code>request_period</code> and <code>reply_period</code> are the average periods between drop cover packet dispatches
+for the session from the source node and the destination node respectively. Note that:
+<ul>
+<li>All mixnodes in a session should dispatch drop cover packets at the same (average) rate; see
+the <a href="./parameters.html">parameters chapter</a>.</li>
+<li>From the perspective of the nodes, the session phase may change at any time. As such, it should
+be assumed, for a conservative estimate, regardless of the current phase, that traffic will be
+sent at half rate in all sessions.</li>
+</ul>
+</li>
+<li><code>request_len</code> is the number of request/reply packets queued ahead of the last request packet,
+plus one.</li>
+<li><code>reply_len</code> is the maximum length of the destination node's request/reply queue. Note that all
+mixnodes in a session should have the same queue bound; see the <a href="./parameters.html">parameters
+chapter</a>.</li>
+<li>The <code>queue_delay</code> expression is an approximation of the 99.995th percentile of the sum of two
+independent gamma-distributed random variables with different scales (<code>s</code>, <code>s * r</code>) and shapes
+(<code>n</code>, <code>m</code>).</li>
+<li><code>per_hop_net_delay</code> is a conservative estimate of the network (and processing) delay per hop.</li>
+<li><code>num_hops</code> is the maximum number of hops for any of the fragments to reach the destination, plus
+the maximum number of hops for any of the SURBs to come back. The number of hops in a route is
+the number of nodes (including both source and destination) minus one.</li>
+<li><code>forwarding_delay</code> is the maximum total <a href="./sphinx.html#forward-actions">forwarding delay</a> for any
+request fragment, plus the maximum total forwarding delay for any SURB.</li>
+<li><code>handling_delay</code> is a conservative estimate of the time taken to handle the request at the
+destination and post the reply. In the case of a <a href="requests-and-replies.html#submitextrinsic"><code>SubmitExtrinsic</code></a> request
+for example, this should include the artifical extrinsic delay.</li>
+</ul>
+<p>If a complete reply message is not received within this time, the request message may be
+retransmitted. When retransmitting, different packet routes should be used, and new SURBs should be
+generated.</p>
+<h2 id="request-handling"><a class="header" href="#request-handling">Request handling</a></h2>
+<p>Sending a reply message is similar to sending a request message. The message is <a href="./message-fragmentation.html#construction">split into
+fragments</a>, which are then wrapped in Sphinx packets
+(<a href="./sphinx.html#surb-use">using the SURBs</a> attached to the request message) and pushed onto the
+session's request/reply queue. Multiple copies of each fragment may be sent, provided enough SURBs
+were attached to the request message, and there is enough space in the request/reply queue.</p>
+<p>To avoid handling the same request multiple times, reply messages should be cached by request
+message ID. When sending a cached reply, the original reply message ID should be reused, but the
+Sphinx packets should be constructed from different SURBs (eg the ones attached to the triggering
+request message).</p>
+<p>If two request messages with the same ID are received in short succession (as determined by the
+reply cooldown <a href="./parameters.html">parameter</a>), the second message should be assumed to be a copy
+sent at the same time as the first, rather than a retransmission, and should be ignored.</p>
+<h2 id="reply-handling"><a class="header" href="#reply-handling">Reply handling</a></h2>
+<p>The request message ID corresponding to a received reply message should be inferred from the last
+received packet; the SURB keystore stores request message IDs alongside payload encryption keys.
+The request to which the message is a reply should be determined from this ID. If the ID is no
+longer recognised, the reply message should simply be dropped.</p>
+<p>Any SURBs attached to a reply message should be ignored.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="cover-traffic"><a class="header" href="#cover-traffic">Cover traffic</a></h1>
+<p>There are two types of cover traffic: drop and loop. They differ in two ways:</p>
+<ul>
+<li>Destination selection for a drop cover packet is the same as for a request: a random mixnode,
+excluding the source node and, if there is exactly one, its connected gateway mixnode. Loop cover
+packets are always sent from a node to itself.</li>
+<li>Drop cover packets are replaced by packets from the <a href="./requests-and-replies.html#packet-queues">request/reply
+queue</a> for the session. Loop cover packets are never
+replaced.</li>
+</ul>
+<p>Nodes should dispatch drop and loop cover packets in each active session according to Poisson
+processes. The average drop/loop rates should be the same for all mixnodes in a session, and for
+all non-mixnodes in a session; see the <a href="./parameters.html">parameters chapter</a>. Note that the rates
+should be halved in some phases; see the <a href="./sessions.html#phases">sessions chapter</a>.</p>
+<div style="break-before: page; page-break-before: always;"></div><h1 id="parameters"><a class="header" href="#parameters">Parameters</a></h1>
+<p>All nodes in a Substrate Mix Network should agree on the following parameters:</p>
+<ul>
+<li>Mean forwarding delay. This is the average artificial packet delay at <a href="./sphinx.html#forward-actions">each
+hop</a>.</li>
+<li>Mean extrinsic delay. This is the average artificial delay between receipt of a
+<a href="./requests-and-replies.html#submitextrinsic"><code>SubmitExtrinsic</code></a> request and import of the attached
+extrinsic.</li>
+<li>Maximum fragments per message. See the <a href="./message-fragmentation.html#reassembly">message fragmentation
+chapter</a>.</li>
+<li>Maximum length of a mixnode's <a href="./requests-and-replies.html#packet-queues">request/reply queue</a>.
+Note that in sessions where a node is not a mixnode, it is free to choose the queue bound itself.</li>
+<li>Reply cooldown. If a node receives two requests with the same message ID within this time period,
+it should not reply to both of them. See the <a href="./requests-and-replies.html#request-handling">requests and replies
+chapter</a>.</li>
+<li>Average cover traffic rates. There are four independent rates: mixnode loop, mixnode drop,
+non-mixnode loop, and non-mixnode drop. See the <a href="./cover-traffic.html">cover traffic chapter</a>.</li>
+</ul>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+        <script>
+        window.addEventListener('load', function() {
+            window.setTimeout(window.print, 100);
+        });
+        </script>
+
+    </div>
+    </body>
+</html>

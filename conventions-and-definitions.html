@@ -1,0 +1,295 @@
+<!DOCTYPE HTML>
+<html lang="en" class="sidebar-visible no-js light">
+    <head>
+        <!-- Book generated using mdBook -->
+        <meta charset="UTF-8">
+        <title>Conventions and definitions - Substrate Mix Network Specification</title>
+
+
+        <!-- Custom HTML head -->
+        
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="theme-color" content="#ffffff" />
+
+        <link rel="icon" href="favicon.svg">
+        <link rel="shortcut icon" href="favicon.png">
+        <link rel="stylesheet" href="css/variables.css">
+        <link rel="stylesheet" href="css/general.css">
+        <link rel="stylesheet" href="css/chrome.css">
+        <link rel="stylesheet" href="css/print.css" media="print">
+
+        <!-- Fonts -->
+        <link rel="stylesheet" href="FontAwesome/css/font-awesome.css">
+        <link rel="stylesheet" href="fonts/fonts.css">
+
+        <!-- Highlight.js Stylesheets -->
+        <link rel="stylesheet" href="highlight.css">
+        <link rel="stylesheet" href="tomorrow-night.css">
+        <link rel="stylesheet" href="ayu-highlight.css">
+
+        <!-- Custom theme stylesheets -->
+
+    </head>
+    <body>
+    <div id="body-container">
+        <!-- Provide site root to javascript -->
+        <script>
+            var path_to_root = "";
+            var default_theme = window.matchMedia("(prefers-color-scheme: dark)").matches ? "navy" : "light";
+        </script>
+
+        <!-- Work around some values being stored in localStorage wrapped in quotes -->
+        <script>
+            try {
+                var theme = localStorage.getItem('mdbook-theme');
+                var sidebar = localStorage.getItem('mdbook-sidebar');
+
+                if (theme.startsWith('"') && theme.endsWith('"')) {
+                    localStorage.setItem('mdbook-theme', theme.slice(1, theme.length - 1));
+                }
+
+                if (sidebar.startsWith('"') && sidebar.endsWith('"')) {
+                    localStorage.setItem('mdbook-sidebar', sidebar.slice(1, sidebar.length - 1));
+                }
+            } catch (e) { }
+        </script>
+
+        <!-- Set the theme before any content is loaded, prevents flash -->
+        <script>
+            var theme;
+            try { theme = localStorage.getItem('mdbook-theme'); } catch(e) { }
+            if (theme === null || theme === undefined) { theme = default_theme; }
+            var html = document.querySelector('html');
+            html.classList.remove('no-js')
+            html.classList.remove('light')
+            html.classList.add(theme);
+            html.classList.add('js');
+        </script>
+
+        <!-- Hide / unhide sidebar before it is displayed -->
+        <script>
+            var html = document.querySelector('html');
+            var sidebar = null;
+            if (document.body.clientWidth >= 1080) {
+                try { sidebar = localStorage.getItem('mdbook-sidebar'); } catch(e) { }
+                sidebar = sidebar || 'visible';
+            } else {
+                sidebar = 'hidden';
+            }
+            html.classList.remove('sidebar-visible');
+            html.classList.add("sidebar-" + sidebar);
+        </script>
+
+        <nav id="sidebar" class="sidebar" aria-label="Table of contents">
+            <div class="sidebar-scrollbox">
+                <ol class="chapter"><li class="chapter-item expanded "><a href="index.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="conventions-and-definitions.html" class="active"><strong aria-hidden="true">2.</strong> Conventions and definitions</a></li><li class="chapter-item expanded "><a href="sessions.html"><strong aria-hidden="true">3.</strong> Sessions</a></li><li class="chapter-item expanded "><a href="topology.html"><strong aria-hidden="true">4.</strong> Topology</a></li><li class="chapter-item expanded "><a href="blockchain-runtime-interface.html"><strong aria-hidden="true">5.</strong> Blockchain runtime interface</a></li><li class="chapter-item expanded "><a href="networking.html"><strong aria-hidden="true">6.</strong> Networking</a></li><li class="chapter-item expanded "><a href="sphinx.html"><strong aria-hidden="true">7.</strong> Sphinx</a></li><li class="chapter-item expanded "><a href="message-fragmentation.html"><strong aria-hidden="true">8.</strong> Message fragmentation</a></li><li class="chapter-item expanded "><a href="requests-and-replies.html"><strong aria-hidden="true">9.</strong> Requests and replies</a></li><li class="chapter-item expanded "><a href="cover-traffic.html"><strong aria-hidden="true">10.</strong> Cover traffic</a></li><li class="chapter-item expanded "><a href="parameters.html"><strong aria-hidden="true">11.</strong> Parameters</a></li></ol>
+            </div>
+            <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
+        </nav>
+
+        <!-- Track and set sidebar scroll position -->
+        <script>
+            var sidebarScrollbox = document.querySelector('#sidebar .sidebar-scrollbox');
+            sidebarScrollbox.addEventListener('click', function(e) {
+                if (e.target.tagName === 'A') {
+                    sessionStorage.setItem('sidebar-scroll', sidebarScrollbox.scrollTop);
+                }
+            }, { passive: true });
+            var sidebarScrollTop = sessionStorage.getItem('sidebar-scroll');
+            sessionStorage.removeItem('sidebar-scroll');
+            if (sidebarScrollTop) {
+                // preserve sidebar scroll position when navigating via links within sidebar
+                sidebarScrollbox.scrollTop = sidebarScrollTop;
+            } else {
+                // scroll sidebar to current active section when navigating via "next/previous chapter" buttons
+                var activeSection = document.querySelector('#sidebar .active');
+                if (activeSection) {
+                    activeSection.scrollIntoView({ block: 'center' });
+                }
+            }
+        </script>
+
+        <div id="page-wrapper" class="page-wrapper">
+
+            <div class="page">
+                                <div id="menu-bar-hover-placeholder"></div>
+                <div id="menu-bar" class="menu-bar sticky">
+                    <div class="left-buttons">
+                        <button id="sidebar-toggle" class="icon-button" type="button" title="Toggle Table of Contents" aria-label="Toggle Table of Contents" aria-controls="sidebar">
+                            <i class="fa fa-bars"></i>
+                        </button>
+                        <button id="theme-toggle" class="icon-button" type="button" title="Change theme" aria-label="Change theme" aria-haspopup="true" aria-expanded="false" aria-controls="theme-list">
+                            <i class="fa fa-paint-brush"></i>
+                        </button>
+                        <ul id="theme-list" class="theme-popup" aria-label="Themes" role="menu">
+                            <li role="none"><button role="menuitem" class="theme" id="light">Light</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="rust">Rust</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="coal">Coal</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="navy">Navy</button></li>
+                            <li role="none"><button role="menuitem" class="theme" id="ayu">Ayu</button></li>
+                        </ul>
+                        <button id="search-toggle" class="icon-button" type="button" title="Search. (Shortkey: s)" aria-label="Toggle Searchbar" aria-expanded="false" aria-keyshortcuts="S" aria-controls="searchbar">
+                            <i class="fa fa-search"></i>
+                        </button>
+                    </div>
+
+                    <h1 class="menu-title">Substrate Mix Network Specification</h1>
+
+                    <div class="right-buttons">
+                        <a href="print.html" title="Print this book" aria-label="Print this book">
+                            <i id="print-button" class="fa fa-print"></i>
+                        </a>
+
+                    </div>
+                </div>
+
+                <div id="search-wrapper" class="hidden">
+                    <form id="searchbar-outer" class="searchbar-outer">
+                        <input type="search" id="searchbar" name="searchbar" placeholder="Search this book ..." aria-controls="searchresults-outer" aria-describedby="searchresults-header">
+                    </form>
+                    <div id="searchresults-outer" class="searchresults-outer hidden">
+                        <div id="searchresults-header" class="searchresults-header"></div>
+                        <ul id="searchresults">
+                        </ul>
+                    </div>
+                </div>
+
+                <!-- Apply ARIA attributes after the sidebar and the sidebar toggle button are added to the DOM -->
+                <script>
+                    document.getElementById('sidebar-toggle').setAttribute('aria-expanded', sidebar === 'visible');
+                    document.getElementById('sidebar').setAttribute('aria-hidden', sidebar !== 'visible');
+                    Array.from(document.querySelectorAll('#sidebar a')).forEach(function(link) {
+                        link.setAttribute('tabIndex', sidebar === 'visible' ? 0 : -1);
+                    });
+                </script>
+
+                <div id="content" class="content">
+                    <main>
+                        <h1 id="conventions-and-definitions"><a class="header" href="#conventions-and-definitions">Conventions and definitions</a></h1>
+<p>Code snippets roughly follow Rust syntax. <code>a ++ b</code> means the concatenation of arrays <code>a</code> and <code>b</code>.</p>
+<h2 id="x25519"><a class="header" href="#x25519">X25519</a></h2>
+<p>X25519 is a Diffie-Hellman key exchange function, based on the elliptic curve Curve25519. It is
+described in detail in the <a href="https://cr.yp.to/ecdh/curve25519-20060209.pdf">Curve25519 paper</a>.</p>
+<p>X25519 is used to generate shared secrets for packet encryption and such. All X25519 keys and
+shared secrets are encoded as described in the paper.</p>
+<p>The <code>Curve25519</code> function, which multiplies a curve (or twist) point by a &quot;scalar&quot; value (such as a
+secret key), is defined in the paper. The <code>clamp_scalar</code> function is defined as follows:</p>
+<pre><code>fn clamp_scalar(scalar: [u8; 32]) -&gt; [u8; 32] {
+    scalar[0] &amp;= 248
+    scalar[31] &amp;= 127
+    scalar[31] |= 64
+    scalar
+}
+</code></pre>
+<p>It clamps a raw 32-byte value to the set of secret keys (scalars) defined in the paper.</p>
+<h2 id="blake2b"><a class="header" href="#blake2b">BLAKE2b</a></h2>
+<p>BLAKE2b is a cryptographic hash function. It is described in detail in <a href="https://www.blake2.net/blake2.pdf">BLAKE2: simpler, smaller,
+fast as MD5</a>.</p>
+<p><code>blake2b(personalisation, seed, key)</code> is defined as the BLAKE2b hash of the empty string computed
+with the given personalisation (ASCII encoded), seed (little-endian encoded), and key.</p>
+<h2 id="generation-of-exponentially-distributed-random-numbers"><a class="header" href="#generation-of-exponentially-distributed-random-numbers">Generation of exponentially distributed random numbers</a></h2>
+<p>The <code>exp_random</code> function is defined as follows:</p>
+<pre><code>fn exp_random(seed: [u8; 16]) -&gt; f64 {
+    rng = rand_chacha::ChaChaRng::from_seed(seed ++ seed)
+    rng.sample::&lt;f64, _&gt;(rand_distr::Exp1).min(10.0)
+}
+</code></pre>
+<p>Where <code>rand_chacha</code> and <code>rand_distr</code> match the behaviour of the <code>crates.io</code> crates with versions
+<a href="https://crates.io/crates/rand_chacha/0.3.1">0.3.1</a> and
+<a href="https://crates.io/crates/rand_distr/0.4.3">0.4.3</a> respectively.</p>
+<p>Given random 16-byte seeds, it produces exponentially distributed random <code>f64</code>s with a mean of 1.</p>
+<p>The following assertions should all succeed:</p>
+<pre><code>assert_eq!(
+    exp_random([
+        0xdc, 0x18, 0x0e, 0xe6, 0x71, 0x1e, 0xcf, 0x2d,
+        0xad, 0x0c, 0xde, 0xd1, 0xd4, 0x94, 0xbd, 0x3b
+    ]),
+    2.953842296445717
+)
+assert_eq!(
+    exp_random([
+        0x0a, 0xcc, 0x48, 0xbd, 0xa2, 0x30, 0x9a, 0x48,
+        0xc8, 0x78, 0x61, 0x0d, 0xf8, 0xc2, 0x8d, 0x99
+    ]),
+    1.278588765412407
+)
+assert_eq!(
+    exp_random([
+        0x17, 0x4c, 0x40, 0x2f, 0x8f, 0xda, 0xa6, 0x46,
+        0x45, 0xe7, 0x1c, 0xb0, 0x1e, 0xff, 0xf8, 0xfc
+    ]),
+    0.7747915675800142
+)
+assert_eq!(
+    exp_random([
+        0xca, 0xe8, 0x07, 0x72, 0x17, 0x28, 0xf7, 0x09,
+        0xd8, 0x7d, 0x3e, 0xa2, 0x03, 0x7d, 0x4f, 0x03
+    ]),
+    0.8799379598933348
+)
+assert_eq!(
+    exp_random([
+        0x61, 0x56, 0x54, 0x41, 0xd0, 0x25, 0xdf, 0xe7,
+        0xb9, 0xc8, 0x6a, 0x56, 0xdd, 0x27, 0x09, 0xa6
+    ]),
+    10.0
+)
+</code></pre>
+<h2 id="peer-ids"><a class="header" href="#peer-ids">Peer IDs</a></h2>
+<p>The peer IDs published on the blockchain and used in forward actions are raw 32-byte Ed25519 public
+keys, encoded as described in the <a href="https://ed25519.cr.yp.to/ed25519-20110926.pdf">Ed25519 paper</a>.
+They are convertible to normal libp2p peer IDs as described in the libp2p <a href="https://github.com/libp2p/specs/blob/master/peer-ids/peer-ids.md">Peer Ids and
+Keys</a> specification.</p>
+
+                    </main>
+
+                    <nav class="nav-wrapper" aria-label="Page navigation">
+                        <!-- Mobile navigation buttons -->
+                            <a rel="prev" href="index.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+
+                            <a rel="next" href="sessions.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
+
+                        <div style="clear: both"></div>
+                    </nav>
+                </div>
+            </div>
+
+            <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                    <a rel="prev" href="index.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
+
+                    <a rel="next" href="sessions.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
+            </nav>
+
+        </div>
+
+
+
+
+        <script>
+            window.playground_copyable = true;
+        </script>
+
+
+        <script src="elasticlunr.min.js"></script>
+        <script src="mark.min.js"></script>
+        <script src="searcher.js"></script>
+
+        <script src="clipboard.min.js"></script>
+        <script src="highlight.js"></script>
+        <script src="book.js"></script>
+
+        <!-- Custom JS scripts -->
+
+
+    </div>
+    </body>
+</html>
